@@ -1,5 +1,7 @@
 package game;
 
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.security.Key;
 import java.util.ArrayList;
@@ -7,51 +9,66 @@ import java.util.List;
 
 public class KeyListener implements java.awt.event.KeyListener {
 
-    public Panel panel;
+    boolean inConsole = false;
+    String consoleMsg;
 
-    List<Integer> keys = new ArrayList();
+    public Panel panel;
 
     public KeyListener(Panel panel) {
         this.panel = panel;
     }
 
+    public Main main = new Main();
+
     @Override
-    public void keyReleased(KeyEvent e) {
-        if (keys.contains(e.getKeyCode())) {
-            for (int i = 0;i < keys.size();i++) {
-                if (keys.get(i).equals(e.getKeyCode())) {
-                    keys.remove(i);
-                    break;
-                }
-            }
+    public void keyReleased(KeyEvent e) {}
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        if (e.getKeyCode()==KeyEvent.VK_BACK_SPACE && inConsole) {
+            panel.stringBackspace();
+            return;
+        }
+        if (inConsole) {
+            System.out.println("print");
+            panel.addString(String.valueOf(e.getKeyChar()));
         }
     }
-    @Override
-    public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (!keys.contains(e.getKeyCode())) {
-            keys.add(e.getKeyCode());
+        if (e.getKeyCode()==KeyEvent.VK_ESCAPE) {
+            if (!inConsole) {
+                main.closeFrame();
+            } else {
+                inConsole = false;
+                panel.resetConsoleString();
+                panel.repaint();
+            }
         }
-        if (keys.contains(87) && keys.contains(68)) {
-            panel.setLoc(5,-5);
+
+        if (e.getKeyCode()==KeyEvent.VK_0 && !inConsole) {
+            panel.addString(">");
+            inConsole = true;
+        }
+        if (inConsole) {
             return;
         }
-        //up left
-        if (keys.contains(87) && keys.contains(65)) {
-            panel.setLoc(-5,-5);
-            return;
-        }
-        //down right
-        if (keys.contains(83) && keys.contains(68)) {
-            panel.setLoc(5,5);
-            return;
-        }
-        //down left
-        if (keys.contains(83) && keys.contains(65)) {
-            panel.setLoc(-5,5);
-            return;
+        if (e.getKeyCode()==KeyEvent.VK_F1) {
+            if (panel.getColor("wall").equals(Color.BLACK)) {
+                panel.setColors("wall", Color.WHITE);
+                panel.setColors("air",Color.BLACK);
+                panel.setColors("msg",Color.WHITE);
+                panel.repaint();
+                return;
+            }
+            if (panel.getColor("wall").equals(Color.WHITE)) {
+                panel.setColors("wall", Color.BLACK);
+                panel.setColors("air",Color.WHITE);
+                panel.setColors("msg",Color.BLACK);
+                panel.repaint();
+                return;
+            }
         }
         if (e.getKeyCode()==KeyEvent.VK_LEFT || e.getKeyCode()==KeyEvent.VK_A) {
             panel.moveLeft();
